@@ -161,7 +161,7 @@ fraction_sum = sum(fractionlist)
 def input_manipulate():
     for line in input_list:
         if line [0] == 'INPUT':
-            
+            a = 1
     
     return
 
