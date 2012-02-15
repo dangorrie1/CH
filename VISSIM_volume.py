@@ -12,7 +12,8 @@ pairlist = {}
 x = 0
 number_routes = 0
 route_count = 0
-
+key_link = 0
+volume = 0
 
 input = open('I_95_Existing AM_V4_COMscript_routes.inp' , 'r')
 Directory = input.readlines()
@@ -131,7 +132,13 @@ def links_isolate(): #isolates all the links in a given route and appends them t
     number_routes = len(route_hold_list)               
 
     return number_routes
-        
+
+def key_link_identify():
+    for line in list1:
+        if line[0] == 'LINK':
+            key_link = line[1]
+            
+    return key_link
  
 def route_manipulate():
     
@@ -152,24 +159,30 @@ def fraction_list_create():
         if line[0] == 'FRACTION':
             fraction = line [1]
             fractionlist.append(fraction)
+            fraction_sum = sum(fractionlist)
+            decimal = fraction / fraction_sum
         else:
-            pass
-    return fractionlist
+            pass   
+    volume = volumelist[key_link] * decimal
+    
+return volume        
 
-fraction_sum = sum(fractionlist)
-
-def input_manipulate():
+def input_count():
+    count1 = []
     for line in input_list:
         if line [0] == 'INPUT':
-            a = 1
-    
-    return
+            count1.append(line)
+            count_length = len(count1)
+        else:
+            pass
+            
+    return count_length
 
 def volume_identify():
-    
-    
-    
-    return
+    for line in input_list:
+        if line[0] == 'LINK' and line[1] == key_link:
+            volumelist[key_link] = line[4]
+    return volumelist
 
            
 
