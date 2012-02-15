@@ -14,6 +14,7 @@ number_routes = 0
 route_count = 0
 key_link = 0
 volume = 0
+rd_count = 0
 
 input = open('I_95_Existing AM_V4_COMscript_routes.inp' , 'r')
 Directory = input.readlines()
@@ -54,24 +55,45 @@ def routing_decision_count(): #counts the total number of routing decisions
     for line in rd:
         if line[0] == 'ROUTING_DECISION':
             count.append(1)
-            x = len(count)
-        return x
+            rd_count = len(count)
+    return rd_count
        
         
         
-def routing_decision_isolate(): #isolates a single route from the list rd
-    for line in rd:
-        if line [0] == 'ROUTING_DECISION':
-            listbegin1 = line
-            next()
-            listend1 = line
-            StopIteration
-            list1 = rd[listbegin1 : listend1]
-            s = list1 [1]
-            originlink = s [1]
-        else:
-            pass
-    return originlink, list1
+def routing_decision_isolate(): #isolates a single routing decision from the list rd
+    m = 0
+    while m < rd_count:
+        for line in rd:
+            if line [0] == 'ROUTING_DECISION' and m == 0:
+                listbegin1 = line
+                next()
+                listend1 = line
+                StopIteration
+                list1 = rd[listbegin1 : listend1]
+                
+                volume_identify()
+                route_counter()
+                route_isolate()
+                
+            elif line[0] == 'ROUTING DECISION' and m != 0:
+                n = m
+                while n > 0:
+                    next()
+                    n = n - 1
+                listbegin1 = line
+                next()
+                listend1 = line
+                StopIteration
+                list1 = rd[listbegin1 : listend1]
+                
+                volume_identify()
+                route_counter()
+                route_isolate()
+                
+            else:
+                pass
+                    
+    return list1
 
 def route_counter(): #counts the number of routes in a given routing decision
     count1 = []
@@ -85,14 +107,17 @@ def route_counter(): #counts the number of routes in a given routing decision
 return route_count
     
 def route_isolate(): #isolates a single route from within the routing decision   
+    key_link_identify ()
+    
     while x < route_count:   
         for line in list1:
             if x == 0 and line[0] == 'ROUTE':
                 listbegin2 = line
                 next ()
                 listend2 = line
+                StopIteration
                 list2.append(list1[listbegin2 : listend2])
-                
+                                
                 links_isolate()
                 
                 x = x + 1 
@@ -106,7 +131,9 @@ def route_isolate(): #isolates a single route from within the routing decision
                 listbegin2 = line
                 next ()
                 listend2 = line
+                StopIteration
                 list2.append(list1[listbegin2 : listend2])
+                
                 
                 links_isolate()
                 
@@ -127,24 +154,21 @@ def links_isolate(): #isolates all the links in a given route and appends them t
     a = list2 [2]
     temp = a [1:]
 
-    links = b + temp + list2[3:]
+    links = b + temp + list2[3:] + key_link
     route_hold_list.append(links)
-    number_routes = len(route_hold_list)               
+    
+    for link in route_hold_list:
+        pairlist[link] = volume              
 
-    return number_routes
+    return pairlist
 
-def key_link_identify():
+def key_link_identify(): #identifies the first link -- ties in with inputs
     for line in list1:
         if line[0] == 'LINK':
             key_link = line[1]
             
     return key_link
  
-def route_manipulate():
-    
-    
-    
-    return
 
         
      
@@ -154,7 +178,8 @@ def route_manipulate():
 #with each route being a key for the fraction. At that point, we will simply have to run a 
 #sort function in the dictionary, and add up all thev volume values that are called for by 
 #the same key     
-def fraction_list_create():                 
+
+def volume_identify():                 
     for line in list1:                      
         if line[0] == 'FRACTION':
             fraction = line [1]
@@ -163,6 +188,12 @@ def fraction_list_create():
             decimal = fraction / fraction_sum
         else:
             pass   
+    
+    
+    for line in input_list:
+        if line[0] == 'LINK' and line[1] == key_link:
+            volumelist[key_link] = line[4]
+    
     volume = volumelist[key_link] * decimal
     
 return volume        
@@ -178,11 +209,20 @@ def input_count():
             
     return count_length
 
-def volume_identify():
-    for line in input_list:
-        if line[0] == 'LINK' and line[1] == key_link:
-            volumelist[key_link] = line[4]
-    return volumelist
+
+    
+''''''''''''''''''''''''''''''''''''''''''''''''
+''''''''''''''''''''''''''''''''''''''''''''''''
+
+routing_decision_count()
+routing_decision_isolate()
+
+
+
+
+
+
+
 
            
 
