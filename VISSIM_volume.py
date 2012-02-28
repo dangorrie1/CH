@@ -1,7 +1,12 @@
 #import sys
 #import os
-
-
+from Tkinter import *
+import tkFileDialog
+ 
+ 
+master = Tk()
+master.withdraw() #hiding tkinter window
+ 
 rd = []
 list1 = []
 fractionlist = []
@@ -10,31 +15,43 @@ list2 = []
 volumelist = {}
 pairlist = {}
 x = 0
+m = 0
+n = 0
 number_routes = 0
 route_count = 0
 key_link = 0
 volume = 0
 rd_count = 0
+listbegin = 0
+listend = 0
 
-input = open('I_95_Existing AM_V4_COMscript_routes.inp' , 'r')
+
+file_path = tkFileDialog.askopenfilename(title="Open file", filetypes=[("VISSIM File",".inp"),("All files",".*")])
+ 
+   
+input = open(file_path , 'r')
 Directory = input.readlines()
 #reads the text file as a list, with each line a seperate element
 
 
+
+
 for line in Directory:
     if line == "-- Routing Decisions: --":
-        listbegin = line
+        listbegin = Directory.index(line)
     elif line == "-- Desired Speed Decisions: --":
-        listend = line
+        listend = Directory.index(line)
     else:
         pass  
-rd = Directory [listbegin : listend]    
+rd.append(Directory [listbegin : listend])   
+print rd[1], "::" , rd[-1]
+
 
 for line in Directory:
     if line == "-- Inputs: --":
-        m = line
+        m = Directory.index(line)
     elif line == "-- Traffic Compositions: --":
-        n = line
+        n = Directory.index(line)
     else:
         pass
 input_list = Directory [m:n]
@@ -56,7 +73,7 @@ def routing_decision_count(): #counts the total number of routing decisions
         if line[0] == 'ROUTING_DECISION':
             count.append(1)
             rd_count = len(count)
-    return rd_count
+    return 
        
         
         
@@ -93,7 +110,7 @@ def routing_decision_isolate(): #isolates a single routing decision from the lis
             else:
                 pass
                     
-    return list1
+    return 
 
 def route_counter(): #counts the number of routes in a given routing decision
     count1 = []
@@ -104,7 +121,7 @@ def route_counter(): #counts the number of routes in a given routing decision
             pass
         route_count = len(count1)
     
-return route_count
+    return route_count
     
 def route_isolate(): #isolates a single route from within the routing decision   
     key_link_identify ()
@@ -196,7 +213,7 @@ def volume_identify():
     
     volume = volumelist[key_link] * decimal
     
-return volume        
+    return volume        
 
 def input_count():
     count1 = []
