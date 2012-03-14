@@ -6,7 +6,11 @@ import tkFileDialog
  
 master = Tk()
 master.withdraw() #hiding tkinter window
- 
+
+input_list = [] 
+temp_list = []
+temp1 = [] 
+temp2 = [] 
 rd = []
 list1 = []
 fractionlist = []
@@ -24,56 +28,56 @@ volume = 0
 rd_count = 0
 listbegin = 0
 listend = 0
+perm_counter = 0
 
 
 file_path = tkFileDialog.askopenfilename(title="Open file", filetypes=[("VISSIM File",".inp"),("All files",".*")])
- 
-   
-input = open(file_path , 'r')
-Directory = input.readlines()
+f = open(file_path)
+Directory = f.readlines()
+#print(Directory)
+#print(len(Directory))
+#print(Directory[3050:3070])
+
 #reads the text file as a list, with each line a seperate element
 
+listbegin = Directory.index("-- Routing Decisions: --\r\n")
+listend = Directory.index("-- Desired Speed Decisions: --\r\n")
+m = Directory.index("-- Inputs: --\r\n")
+n = Directory.index("-- Traffic Compositions: --\r\n") 
+        
+#print(listbegin)    
+#print(listend)
+a = Directory[listbegin : listend] 
+temp1.append(a)   
 
-
-
-for line in Directory:
-    if line == "-- Routing Decisions: --":
-        listbegin = Directory.index(line)
-    elif line == "-- Desired Speed Decisions: --":
-        listend = Directory.index(line)
-    else:
-        pass  
-rd.append(Directory [listbegin : listend])   
-print rd[1], "::" , rd[-1]
-
-
-for line in Directory:
-    if line == "-- Inputs: --":
-        m = Directory.index(line)
-    elif line == "-- Traffic Compositions: --":
-        n = Directory.index(line)
-    else:
-        pass
-input_list = Directory [m:n]
+a = Directory [m:n]
+temp2.append(a)
   
 #cuts out irrelevant sections of the list
 
-for line in input_list:
-    line.split()
-for line in rd:
-    line.split([]) 
+for line in temp1:
+    for item in line:
+        a = item.split()
+        rd.append(a)
+for line in temp2:
+    for item in line:
+        a = item.split()
+        input_list.append(a)
 #each element in the list is now a list; each word in the text file is an element
 
- 
+#print(rd)
+#print(input_list) 
     
 
-def routing_decision_count(): #counts the total number of routing decisions
-    count = []
-    for line in rd:
-        if line[0] == 'ROUTING_DECISION':
-            count.append(1)
-            rd_count = len(count)
-    return 
+
+count = 0
+for line in rd:
+    for item in line:
+        if item == 'ROUTING_DECISION':
+            count = count + 1
+rd_count = count
+#print(rd_count)                                
+
        
         
         
@@ -81,31 +85,48 @@ def routing_decision_isolate(): #isolates a single routing decision from the lis
     m = 0
     while m < rd_count:
         for line in rd:
-            if line [0] == 'ROUTING_DECISION' and m == 0:
-                listbegin1 = line
-                next()
-                listend1 = line
-                StopIteration
-                list1 = rd[listbegin1 : listend1]
+            for item in line:
+                if item == 'ROUTING_DECISION':
+                    temp_list.append(rd.index(line))
+                    
+                    
+    listbegin = temp_list[perm_counter]
+    listend = temp_list[perm_counter]
+    perm_counter += 1                
+                    
                 
-                volume_identify()
-                route_counter()
-                route_isolate()
-                
-            elif line[0] == 'ROUTING DECISION' and m != 0:
-                n = m
-                while n > 0:
+'''
+                if item == 'ROUTING_DECISION' and m == 0:
+                    
+                    listbegin1 = rd.index(line)
                     next()
-                    n = n - 1
-                listbegin1 = line
-                next()
-                listend1 = line
-                StopIteration
-                list1 = rd[listbegin1 : listend1]
+                    listend1 = rd.index(line)
+                    StopIteration
+                    list1 = rd[listbegin1 : listend1]
+                    
+                    print(list1)
+                    
+                    #volume_identify()
+                    #route_counter()
+                    #route_isolate()
                 
-                volume_identify()
-                route_counter()
-                route_isolate()
+                elif item == 'ROUTING_DECISION' and m != 0:
+                    n = m
+                    while n > 0:
+                        next()
+                        n = n - 1
+                    listbegin1 = rd.index(line)
+                    next()
+                    listend1 = rd.index(line)
+                    StopIteration
+                    list2 = rd[listbegin1 : listend1]
+                    
+                    print(list2)
+                    
+                    #volume_identify()
+                    #route_counter()
+                    #route_isolate()
+                    '''
                 
             else:
                 pass
@@ -231,7 +252,8 @@ def input_count():
 ''''''''''''''''''''''''''''''''''''''''''''''''
 ''''''''''''''''''''''''''''''''''''''''''''''''
 
-routing_decision_count()
+
+
 routing_decision_isolate()
 
 
