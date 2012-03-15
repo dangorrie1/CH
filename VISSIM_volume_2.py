@@ -13,14 +13,16 @@ master.withdraw() #hiding tkinter window
 
 input_list = [] 
 temp_list = []
+temp_route_list = []
 temp1 = [] 
 temp2 = [] 
 rd = []
-list1 = []
 fractionlist = []
 route_hold_list = []
+route_list = []
 list2 = []
-volumelist = {}
+destination_list = []
+link_list = []
 pairlist = {}
 x = 0
 m = 0
@@ -32,7 +34,13 @@ volume = 0
 rd_count = 0
 listbegin = 0
 listend = 0
-perm_counter = 0
+input_volume = 0
+ultimate_list = []
+
+#to be used in while loops
+perm_counter = 1
+perm_route_counter = 1
+
 
 
 file_path = tkFileDialog.askopenfilename(title="Open file", filetypes=[("VISSIM File",".inp"),("All files",".*")])
@@ -82,48 +90,126 @@ rd_count = count
         
         
 # Section below isolates an individual routing decision from the list of all routing decisions
-#m = 0
-#while m < rd_count:
+
 for line in rd:
     for item in line:
         if item == 'ROUTING_DECISION':
             temp_list.append(rd.index(line))
+
+#beginning of first while loop
+
+while perm_counter < rd_count:                   
                     
-                    
-listbegin = temp_list[perm_counter]
-listend = temp_list[perm_counter + 1]
-perm_counter = perm_counter + 1
-
-#print("perm_counter = " perm_counter)
-#print(listbegin)
-#print(listend)
-
-#this is the first routing decision
-routing_list = rd[listbegin:listend]
-
-print(routing_list)
-
-#these are some general manipulations. they could be moved above later, so as to take them out of the while loop
-for line in routing_list:                      
-    for item in line:
-        if item == 'FRACTION':
-            fraction = line [1]
-            fractionlist.append(float(fraction))
-            fraction_sum = sum(fractionlist)
-            decimal = fractionlist[0] / fraction_sum
-    else:
-        pass   
-
-print(fraction)
-print(decimal)   
-
+    listbegin = temp_list[perm_counter-1]
+    listend = temp_list[perm_counter]
+    perm_counter = perm_counter + 1
     
-for line in input_list:
-    for item in line:
-        if item == 'LINK' and item == key_link:
-            volumelist[key_link] = line[4]
     
-volume = volumelist[key_link] * decimal
+    #this is the first routing decision
+    #will need code to clear and reset for subsequent iterations
+    routing_list = rd[listbegin:listend]
+    
+    for line in routing_list:                      
+        for item in line:
+            if item == 'FRACTION':
+                fraction = line [1]
+                fractionlist.append(float(fraction))
+                fraction_sum = sum(fractionlist)
+                
+        else:
+            pass   
+    
+    
+    
+    count = 0
+    for line in routing_list:
+        for item in line:
+            if item == 'ROUTE':
+                count = count + 1
+    route_count = count
+    
+    
+    
+    for line in routing_list:
+        for item in line:
+            if item == 'LINK':
+                for item in line:
+                    if item == 'DESTINATION':
+                        destination_link = line[4]
+                        destination_list.append(destination_link) 
+                    elif line[0] != 'ROUTE':
+                        key_link = line [1]
+            
+            
+                
+    #print(key_link)
+    #print(destination_list)
+    
+    
+    
+        
+    #isolates the individual route, will be looped in a while loop to accomodate each route   
+    for line in routing_list:
+        for item in line:
+            if item == 'ROUTE':
+                temp_route_list.append(routing_list.index(line))
 
 
 
+while perm_route_counter < (route_count-1):
+    
+    link_list = []       
+    routelistbegin = temp_route_list[perm_route_counter-1]
+    routelistend = temp_route_list[perm_route_counter]
+    
+    
+    route_list = routing_list[routelistbegin : routelistend]
+    
+    #print(route_list)
+    
+    #following codeseparates the individual links from the rest and appends to a list
+    link_list.append(destination_list[perm_route_counter-1])
+    print(destination_list[perm_route_counter-1])
+    link_list.append(key_link)
+    print(key_link)
+    
+    a = route_list[2]
+    for item in a[1:]:
+        link_list.append(item)
+        
+    for line in route_list[3:]:
+        for item in line:
+            link_list.append(item)
+    
+    link_list.sort()
+    print(link_list)
+    
+    for item in link_list:
+        ultimate_list.append(item)
+    
+    
+    decimal = fractionlist[perm_route_counter-1] / fraction_sum
+    
+    for line in input_list:
+        for item in line:
+            if item == 'LINK':
+                for item in line:
+                    if item == key_link:
+                        input_volume = line[3]   
+    volume = float(input_volume) * decimal
+    print(volume)
+    
+    perm_route_counter = perm_route_counter + 1
+    
+    for item in link_list:
+        pairlist[item] = volume
+    #OUTPUT
+    import simplejson
+    f = open('/home/daniel/CH/output.txt', 'w')
+    simplejson.dump(pairlist, f)
+    
+    
+    print(pairlist)
+
+
+f.close()
