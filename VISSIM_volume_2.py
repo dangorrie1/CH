@@ -23,7 +23,10 @@ route_list = []
 list2 = []
 destination_list = []
 link_list = []
+final_list_1 = []
+final_list_2 = []
 pairlist = {}
+lastpair = {}
 x = 0
 m = 0
 n = 0
@@ -36,6 +39,9 @@ listbegin = 0
 listend = 0
 input_volume = 0
 ultimate_list = []
+templist = []
+templist2 = []
+
 
 #to be used in while loops
 perm_counter = 1
@@ -96,19 +102,29 @@ for line in rd:
         if item == 'ROUTING_DECISION':
             temp_list.append(rd.index(line))
 
+
 #beginning of first while loop
 
-while perm_counter < rd_count:                   
+while perm_counter <= rd_count:                   
                     
-    listbegin = temp_list[perm_counter-1]
-    listend = temp_list[perm_counter]
+    perm_route_counter = 1
+    del temp_route_list[:]
+    
+    if perm_counter < rd_count:
+        listbegin = temp_list[perm_counter-1]
+        listend = temp_list[perm_counter]
+        routing_list = rd[listbegin:listend]
+    else:
+        listbegin = temp_list[perm_counter-1]
+        routing_list = rd[listbegin: ]
+        
     perm_counter = perm_counter + 1
     
     
     #this is the first routing decision
     #will need code to clear and reset for subsequent iterations
-    routing_list = rd[listbegin:listend]
     
+    del fractionlist[:]
     for line in routing_list:                      
         for item in line:
             if item == 'FRACTION':
@@ -128,6 +144,7 @@ while perm_counter < rd_count:
                 count = count + 1
     route_count = count
     
+    #print(route_count)
     
     
     for line in routing_list:
@@ -141,9 +158,8 @@ while perm_counter < rd_count:
                         key_link = line [1]
             
             
-                
-    #print(key_link)
-    #print(destination_list)
+    #print(routing_list)           
+    
     
     
     
@@ -156,60 +172,92 @@ while perm_counter < rd_count:
 
 
 
-while perm_route_counter < (route_count-1):
-    
-    link_list = []       
-    routelistbegin = temp_route_list[perm_route_counter-1]
-    routelistend = temp_route_list[perm_route_counter]
-    
-    
-    route_list = routing_list[routelistbegin : routelistend]
-    
-    #print(route_list)
-    
-    #following codeseparates the individual links from the rest and appends to a list
-    link_list.append(destination_list[perm_route_counter-1])
-    print(destination_list[perm_route_counter-1])
-    link_list.append(key_link)
-    print(key_link)
-    
-    a = route_list[2]
-    for item in a[1:]:
-        link_list.append(item)
+    while perm_route_counter <= (route_count):
+        pairlist = {}
+        del link_list [:]       
+        if perm_route_counter < route_count:
+            routelistbegin = temp_route_list[perm_route_counter-1]
+            routelistend = temp_route_list[perm_route_counter]
+            route_list = routing_list[routelistbegin : routelistend]
+        else:
+            routelistbegin = temp_route_list[perm_route_counter-1]
+            route_list = routing_list[routelistbegin : ]
         
-    for line in route_list[3:]:
-        for item in line:
+        #print(route_list)
+        
+        #following code separates the individual links from the rest and appends to a list
+        link_list.append(destination_list[perm_route_counter-1])
+        link_list.append(key_link)
+        
+        a = route_list[2]
+        for item in a[1:]:
             link_list.append(item)
-    
-    link_list.sort()
-    print(link_list)
-    
-    for item in link_list:
-        ultimate_list.append(item)
-    
-    
-    decimal = fractionlist[perm_route_counter-1] / fraction_sum
-    
-    for line in input_list:
-        for item in line:
-            if item == 'LINK':
-                for item in line:
-                    if item == key_link:
-                        input_volume = line[3]   
-    volume = float(input_volume) * decimal
-    print(volume)
-    
-    perm_route_counter = perm_route_counter + 1
-    
-    for item in link_list:
-        pairlist[item] = volume
-    #OUTPUT
-    import simplejson
-    f = open('/home/daniel/CH/output.txt', 'w')
-    simplejson.dump(pairlist, f)
-    
-    
-    print(pairlist)
+            
+        for line in route_list[3:]:
+            for item in line:
+                link_list.append(item)
+        
+        link_list.sort()
+        
+        
+        for item in link_list:
+            ultimate_list.append(item)
+        
+        
+        decimal = fractionlist[perm_route_counter-1] / fraction_sum
+        
+        for line in input_list:
+            for item in line:
+                if item == 'LINK':
+                    for item in line:
+                        if item == key_link:
+                            input_volume = line[3]   
+        volume = float(input_volume) * decimal
+        
+        
+        perm_route_counter = perm_route_counter + 1
+        
+        for item in link_list:
+            pairlist[item] = volume
+            
+        #print(pairlist)
+        
+ 
+        for q , p in pairlist.iteritems():
+            templist.append(q)
+            templist2.append(p)
 
 
-f.close()
+#sums the volumes for each routing decision and appends to a list
+for item in templist:
+    count = templist.count(item)
+    tempy = []
+    tempy2 = []
+    while count > 0:
+        a = templist.index(item)
+        j = templist.pop(a)
+        k = templist2.pop(a)
+        tempy.append(j)
+        tempy2.append(k)
+        count = count - 1
+    final_list_1.append(item)
+    final_list_2.append(sum(tempy2),)
+    
+
+    
+lastpair = zip(final_list_1, final_list_2)
+
+'''
+lastpair2 = []
+for line in lastpair:
+    lastpair2.append(line)
+    lastpair2.append('/r/n')
+'''
+
+
+
+import simplejson
+file_path = tkFileDialog.asksaveasfile(title="Choose Save File", filetypes=[("text file",".txt")])
+simplejson.dump(lastpair, file_path)
+file_path.close()
+
