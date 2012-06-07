@@ -15,7 +15,7 @@ input_list = []
 temp_list = []
 temp_route_list = []
 temp1 = [] 
-temp2 = [] 
+composition_list = []
 rd = []
 fractionlist = []
 route_hold_list = []
@@ -28,8 +28,6 @@ final_list_2 = []
 pairlist = {}
 lastpair = {}
 x = 0
-m = 0
-n = 0
 number_routes = 0
 route_count = 0
 key_link = 0
@@ -60,25 +58,41 @@ listbegin = Directory.index("-- Routing Decisions: --\r\n")
 listend = Directory.index("-- Desired Speed Decisions: --\r\n")
 m = Directory.index("-- Inputs: --\r\n")
 n = Directory.index("-- Traffic Compositions: --\r\n") 
+composition_begin = n
+composition_end = Directory.index("-- Distributions: --\r\n")
         
 #print(listbegin)    
 #print(listend)
 a = Directory[listbegin : listend] 
 temp1.append(a)   
 
-a = Directory [m:n]
-temp2.append(a)
-  
-#cuts out irrelevant sections of the list
-
 for line in temp1:
     for item in line:
         a = item.split()
         rd.append(a)
-for line in temp2:
+
+del temp1[:]
+a = Directory [m:n]
+temp1.append(a)
+  
+
+for line in temp1:
     for item in line:
         a = item.split()
         input_list.append(a)
+        
+del temp1[:]
+a = Directory [composition_begin:composition_end]
+temp1.append(a)
+
+for line in temp1:
+    for item in line:
+        a = item.split()
+        composition_list.append(a)
+    
+
+        
+#cuts out irrelevant sections of the list
 #each element in the list is now a list; each word in the text file is an element
 
 
@@ -210,8 +224,30 @@ while perm_counter <= rd_count:
             for item in line:
                 if item == 'LINK':
                     for item in line:
-                        if item == key_link:
+                        if item == key_link:   #vulnerability here, the composition number could be a key link as well, causing a double count
                             input_volume = line[3]   
+                        composition_number = line[5]
+                        
+        for line in composition_list:
+            for item in line:
+                if item == 'COMPOSITION':
+                    for item in line:
+                        if item == composition_number:
+                            hold = composition_list.index(line)
+                            
+        x = hold
+        while x >= 0:
+            for line in composition_list:
+                for item in line:
+                    if item == 'COMPOSITION':
+                        if x > 0:
+                            pass
+                        elif x == 0:
+                            hold2 = composition_list.index(line)
+        print (hold)
+        print (hold2)                
+                
+                        
         volume = float(input_volume) * decimal
         
         
@@ -247,17 +283,16 @@ for item in templist:
     
 lastpair = zip(final_list_1, final_list_2)
 
-'''
-lastpair2 = []
-for line in lastpair:
-    lastpair2.append(line)
-    lastpair2.append('/r/n')
-'''
+
+#for item in lastpair:
+    #print(item)
 
 
+
+'''
 
 import simplejson
 file_path = tkFileDialog.asksaveasfile(title="Choose Save File", filetypes=[("text file",".txt")])
-simplejson.dump(lastpair, file_path)
+simplejson.dump(lastpair, file_path, indent=" ")
 file_path.close()
-
+'''
